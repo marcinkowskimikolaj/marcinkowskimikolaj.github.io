@@ -1239,6 +1239,178 @@
             /* Height will be set by JavaScript */
         }
 
+/* Articles module inside "Content" section */
+.articles-module {
+    padding: 1.5rem 0 2.5rem 0;
+}
+
+.articles-intro {
+    margin: 0 0 2.25rem 0;              /* więcej oddechu nad listą tematów */
+    max-width: 540px;                   /* trochę węższa kolumna – wygląda bardziej jak lead */
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: rgba(26, 26, 26, 0.7);       /* trochę jaśniejsze, żeby nie „konkurowało” z nagłówkiem */
+}
+
+/* Pasek z tematami artykułów */
+.articles-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    margin-bottom: 1.75rem;
+    border-top: 1px solid rgba(26, 26, 26, 0.08); /* subtelna linia oddzielająca opis od „nawigacji” */
+}
+
+.articles-topic {
+    border: none;
+    background: transparent;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0;
+    position: relative;
+    cursor: pointer;
+    color: rgba(26, 26, 26, 0.65);
+    transition: color 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
+    opacity: 0.8;
+}
+
+.articles-topic::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: var(--text-primary);
+    transition: width 0.25s ease;
+}
+
+.articles-topic:hover {
+    color: var(--text-primary);
+}
+
+/* Aktywny temat – podkreślenie i lekkie uniesienie */
+.articles-topic.active {
+    color: var(--text-primary);
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.articles-topic.active::after {
+    width: 100%;
+}
+
+/* Efekt „rozjeżdżania na boki” dla pozostałych tematów */
+.articles-topic:not(.active):nth-child(odd) {
+    transform: translateX(-3px);
+}
+
+.articles-topic:not(.active):nth-child(even) {
+    transform: translateX(3px);
+}
+
+/* Pierwszy przycisk – nawet gdy nieaktywny, nie ucieka w lewo */
+.articles-topic:not(.active):first-child {
+    transform: translateX(0);
+}
+
+/* Lista artykułów */
+.articles-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr);
+    gap: 1.25rem;
+}
+
+.article-card {
+    display: none;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(26, 26, 26, 0.08);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px rgba(26, 26, 26, 0.06);
+    animation: fadeIn 0.25s ease;
+}
+
+.article-card.active {
+    display: block;
+}
+
+.article-title {
+    font-size: 1.05rem;
+    margin: 0 0 0.4rem 0;
+    color: var(--text-primary);
+}
+
+.article-excerpt {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+.article-meta {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+/* Link „czytaj na blogu + logo” – bez pigułki, inline */
+.article-meta {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(26, 26, 26, 0.6);
+}
+
+/* Link „czytaj na blogu + logo” – bez pigułki, inline */
+.article-logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease;   /* tylko kolor, bez opacity */
+}
+
+.article-logo-link span {
+    padding-left: 0.05rem;
+}
+
+/* Hover: tekst robi się w pełni czarny, logo nietknięte */
+.article-logo-link:hover {
+    color: #000000;                /* mocny czarny tylko dla tekstu */
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Responsywność dla artykułów */
+@media (max-width: 768px) {
+    .articles-module {
+        padding-bottom: 2rem;
+    }
+
+    .articles-topics {
+        gap: 0.5rem 1rem;
+    }
+
+    .article-card {
+        padding: 1rem 1.1rem;
+    }
+}
+
+
         /* Testimonial Modal */
         .testimonial-modal {
             display: none;
@@ -1996,6 +2168,45 @@
             }
         }
 
+        // Inicjalizacja modułu artykułów
+        function initArticlesModule() {
+            const subsections = document.querySelectorAll('#subsection-articles');
+            if (!subsections.length) return;
+
+            subsections.forEach(subsection => {
+                const module = subsection.querySelector('.articles-module');
+                if (!module) return;
+
+                const topics = module.querySelectorAll('.articles-topic');
+                const cards = module.querySelectorAll('.article-card');
+                const parentContent = subsection.querySelector('.testimonials-subsection-content');
+
+                topics.forEach(topic => {
+                    topic.addEventListener('click', () => {
+                        const topicKey = topic.dataset.topic;
+
+                        // aktywny nagłówek tematyczny
+                        topics.forEach(t => t.classList.remove('active'));
+                        topic.classList.add('active');
+
+                        // dopasowana karta artykułu
+                        cards.forEach(card => {
+                            card.classList.toggle('active', card.dataset.topic === topicKey);
+                        });
+
+                        // odświeżenie wysokości akordeonu, jeśli otwarty
+                        if (subsection.classList.contains('active') && parentContent) {
+                            parentContent.style.maxHeight = 'none';
+                            setTimeout(() => {
+                                parentContent.style.maxHeight = parentContent.scrollHeight + 'px';
+                            }, 50);
+                        }
+                    });
+                });
+            });
+        }
+
+
         // Funkcja do przełączania widoku YouTube - kategorie <-> filmy
         function toggleYTView(viewType, category) {
             const categoriesGrid = document.getElementById('yt-categories-main');
@@ -2003,15 +2214,12 @@
             const parentContent = document.querySelector('#subsection-youtube .testimonials-subsection-content');
             
             if (viewType === 'categories') {
-                // Pokaż kategorie, ukryj wszystkie kontenery z filmami
                 allVideoContainers.forEach(container => {
                     container.style.display = 'none';
                 });
                 categoriesGrid.style.display = 'grid';
-                
-                // Odśwież maxHeight po przełączeniu na kategorie
+
                 if (parentContent) {
-                    // Ustaw tymczasowo na auto żeby obliczyć prawdziwą wysokość
                     parentContent.style.maxHeight = 'none';
                     setTimeout(() => {
                         const newHeight = parentContent.scrollHeight;
@@ -2019,7 +2227,6 @@
                     }, 50);
                 }
             } else if (viewType === 'videos' && category) {
-                // Ukryj kategorie, pokaż odpowiedni kontener z filmami
                 categoriesGrid.style.display = 'none';
                 allVideoContainers.forEach(container => {
                     container.style.display = 'none';
@@ -2029,8 +2236,7 @@
                 if (targetContainer) {
                     targetContainer.style.display = 'flex';
                 }
-                
-                // Odśwież maxHeight dla rodzica
+
                 if (parentContent) {
                     parentContent.style.maxHeight = 'none';
                     setTimeout(() => {
@@ -2040,6 +2246,9 @@
                 }
             }
         }
+
+        // Inicjalizacja modułu artykułów po załadowaniu DOM
+        document.addEventListener('DOMContentLoaded', initArticlesModule);
 
     </script>
 </head>
@@ -2761,12 +2970,171 @@
                     <span>Artykuły</span>
                     <span class="testimonials-subsection-toggle">+</span>
                 </h3>
-                <div class="testimonials-subsection-content">
-                    <div class="section-content">
-                        <p>Sekcja w budowie...</p>
-                    </div>
-                </div>
+<div class="testimonials-subsection-content">
+    <div class="section-content articles-module">
+        <p class="articles-intro">
+            Poniżej znajdziesz moje eksperckie treści z bloga pogrupowane tematycznie – od fundamentów Pipedrive,
+            przez porządek w danych i automatyzacje, po raportowanie oraz pracę zespołową.
+        </p>
+
+        <!-- Pasek z tematami -->
+        <div class="articles-topics">
+            <button class="articles-topic active" data-topic="fundamenty">
+                Fundamenty Pipedrive
+            </button>
+            <button class="articles-topic" data-topic="dane">
+                Dane, porządek i praca na leadach
+            </button>
+            <button class="articles-topic" data-topic="automatyzacje">
+                Automatyzacje
+            </button>
+            <button class="articles-topic" data-topic="pipeline">
+                Pipeline, prognozy, raporty i wyniki
+            </button>
+            <button class="articles-topic" data-topic="zespol">
+                Organizacja pracy zespołu i komunikacja
+            </button>
+        </div>
+
+        <!-- Lista artykułów – po jednym na każdą sekcję -->
+        <div class="articles-list">
+
+            <!-- Fundamenty Pipedrive -->
+            <div class="article-card active" data-topic="fundamenty">
+                <h4 class="article-title">
+                    Co to jest Pipedrive? Wszystko, co musisz wiedzieć o tym CRM
+                </h4>
+                <p class="article-excerpt">
+                    Pierwszy przewodnik po Pipedrive – dla kogo jest ten CRM, jak działa
+                    i w jaki sposób pomaga poukładać sprzedaż od podstaw.
+                </p>
+
+<div class="article-meta">
+    <a href="https://www.digitpoint.pl/blog/pipedrive"
+       target="_blank"
+       rel="noopener"
+       class="article-logo-link"
+       aria-label="Przeczytaj artykuł „Co to jest Pipedrive?” na blogu DigitPoint">
+        <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">
+    </a>
+</div>
+
             </div>
+
+<!-- Dane, porządek i praca na leadach -->
+<div class="article-card" data-topic="dane">
+    <h4 class="article-title">
+        Jak skutecznie zarządzać leadami i kontaktami w Pipedrive
+    </h4>
+    <p class="article-excerpt">
+        Jak uporządkować bazę kontaktów, kategoryzować leady i pracować na aktywnościach,
+        żeby żaden wartościowy temat nie wypadał z lejka.
+    </p>
+    <div class="article-meta">
+        <a href="https://www.digitpoint.pl/blog/zarzadzanie-leadami-i-kontaktami-w-pipedrive"
+           target="_blank"
+           rel="noopener"
+           class="article-logo-link"
+           aria-label="Przeczytaj artykuł o zarządzaniu leadami i kontaktami w Pipedrive na blogu DigitPoint">
+            <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">    
+        </a>
+    </div>
+</div>
+
+<div class="article-card" data-topic="dane">
+    <h4 class="article-title">
+        Import i eksport danych w Pipedrive – jak nie zrobić sobie bałaganu
+    </h4>
+    <p class="article-excerpt">
+        Krok po kroku, jak przygotować pliki, żeby import do Pipedrive był bezpieczny,
+        szybki i nie skończył się duplikatami w bazie.
+    </p>
+    <div class="article-meta">
+        <a href="https://www.digitpoint.pl/blog/import-i-eksport-danych-w-pipedrive"
+           target="_blank"
+           rel="noopener"
+           class="article-logo-link"
+           aria-label="Przeczytaj artykuł o imporcie i eksporcie danych w Pipedrive na blogu DigitPoint">
+            <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">    
+        </a>
+    </div>
+</div>
+
+            </div>
+
+            <!-- Automatyzacje -->
+            <div class="article-card" data-topic="automatyzacje">
+                <h4 class="article-title">
+                    Automatyzacje w Pipedrive, które oszczędzą Ci godziny pracy
+                </h4>
+                <p class="article-excerpt">
+                    Konkretne przykłady automatyzacji, które zdejmują z zespołu ręczne przypomnienia, statusy
+                    i follow-upy, zostawiając więcej czasu na sprzedaż.
+                </p>
+                <div class="article-meta">
+    <a href="https://www.digitpoint.pl/blog/automatyzacje-w-pipedrive"
+       target="_blank"
+       rel="noopener"
+       class="article-logo-link"
+       aria-label="Przeczytaj artykuł o automatyzacjach w Pipedrive na blogu DigitPoint">
+        <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">    
+    </a>
+</div>
+
+            </div>
+
+            <!-- Pipeline, prognozy, raporty i wyniki -->
+            <div class="article-card" data-topic="pipeline">
+                <h4 class="article-title">
+                    Pipedrive pipeline – 5 sposobów na poprawę przejrzystości
+                </h4>
+                <p class="article-excerpt">
+                    Jak ułożyć pipeline, żeby od razu widzieć priorytety, prognozę
+                    i wąskie gardła – bez przeklikiwania się przez dziesiątki raportów.
+                </p>
+<div class="article-meta">
+    <a href="https://www.digitpoint.pl/blog/pipedrive-pipeline"
+       target="_blank"
+       rel="noopener"
+       class="article-logo-link"
+       aria-label="Przeczytaj artykuł o pracy z pipeline’em w Pipedrive na blogu DigitPoint">
+        <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">    
+    </a>
+</div>
+
+            </div>
+
+            <!-- Organizacja pracy zespołu i komunikacja -->
+            <div class="article-card" data-topic="zespol">
+                <h4 class="article-title">
+                    Jak efektywnie używać szablonów e-mail w Pipedrive, by oszczędzać czas
+                </h4>
+                <p class="article-excerpt">
+                    Jak poukładać szablony maili, żeby zespół pisał szybciej, spójniej
+                    i zgodnie ze standardem komunikacji, zamiast klepać wszystko od zera.
+                </p>
+<div class="article-meta">
+    <a href="https://www.digitpoint.pl/blog/pipedrive-email-templates"
+       target="_blank"
+       rel="noopener"
+       class="article-logo-link"
+       aria-label="Przeczytaj artykuł o szablonach e-mail w Pipedrive na blogu DigitPoint">
+        <span>czytaj na blogu</span>
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJXYXJzdHdhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDIxMDkuODUgMzQyLjc0Ij48cGF0aCBkPSJtNjY2LjU1LDE1LjY4djI1Ni44MWgtNTEuNTd2LTIxLjQ2Yy0xMy4zOCwxNi4xNS0zMi43NywyNC4yMy01OC4xNSwyNC4yMy0xNy41NCwwLTMzLjQtMy45Mi00Ny41OS0xMS43Ny0xNC4xOS03Ljg0LTI1LjMzLTE5LjAzLTMzLjQtMzMuNTctOC4wOC0xNC41NC0xMi4xMS0zMS4zOC0xMi4xMS01MC41M3M0LjAzLTM1Ljk5LDEyLjExLTUwLjUzYzguMDctMTQuNTQsMTkuMjEtMjUuNzIsMzMuNC0zMy41NywxNC4xOS03Ljg0LDMwLjA1LTExLjc3LDQ3LjU5LTExLjc3LDIzLjc2LDAsNDIuMzQsNy41LDU1LjcyLDIyLjVWMTUuNjhoNTMuOTlabS02Ni40NSwyMDEuMjZjOS05LjM0LDEzLjUtMjEuODYsMTMuNS0zNy41NXMtNC41LTI4LjIxLTEzLjUtMzcuNTVjLTktOS4zNC0yMC4zMS0xNC4wMi0zMy45Mi0xNC4wMnMtMjUuMjYsNC42Ny0zNC4yNiwxNC4wMmMtOSw5LjM1LTEzLjUsMjEuODYtMTMuNSwzNy41NXM0LjUsMjguMjEsMTMuNSwzNy41NWM5LDkuMzUsMjAuNDIsMTQuMDIsMzQuMjYsMTQuMDJzMjQuOTItNC42NywzMy45Mi0xNC4wMloiLz48cGF0aCBkPSJtNzI3LjgxLDUxLjY3Yy02LjIzLTUuNzctOS4zNS0xMi45Mi05LjM1LTIxLjQ2czMuMTItMTUuNjksOS4zNS0yMS40NmM2LjIzLTUuNzYsMTQuMy04LjY1LDI0LjIzLTguNjVzMTgsMi43NywyNC4yMyw4LjMxYzYuMjMsNS41NCw5LjM1LDEyLjQ2LDkuMzUsMjAuNzcsMCw5LTMuMTIsMTYuNDQtOS4zNSwyMi4zMi02LjIzLDUuODgtMTQuMzEsOC44My0yNC4yMyw4Ljgzcy0xOC0yLjg4LTI0LjIzLTguNjVabS0yLjc3LDM0LjYxaDUzLjk5djE4Ni4yaC01My45OVY4Ni4yOFoiLz48cGF0aCBkPSJtMTAyOS45NSw4Ni4yOHYxNTUuMDVjMCwzNC4xNS04Ljg4LDU5LjUzLTI2LjY1LDc2LjE0LTE3Ljc3LDE2LjYxLTQzLjczLDI0LjkyLTc3Ljg3LDI0LjkyLTE4LDAtMzUuMDctMi4xOS01MS4yMi02LjU4LTE2LjE1LTQuMzktMjkuNTQtMTAuNzMtNDAuMTUtMTkuMDRsMjEuNDYtMzguNzZjNy44NCw2LjQ2LDE3Ljc2LDExLjU5LDI5Ljc2LDE1LjQsMTIsMy44MSwyMy45OSw1LjcxLDM1Ljk5LDUuNzEsMTguNjksMCwzMi40Ny00LjIxLDQxLjM2LTEyLjYzLDguODgtOC40MywxMy4zMy0yMS4xNywxMy4zMy0zOC4yNHYtNy45NmMtMTQuMDgsMTUuNDYtMzMuNjksMjMuMTktNTguODQsMjMuMTktMTcuMDgsMC0zMi43MS0zLjc1LTQ2LjktMTEuMjUtMTQuMTktNy40OS0yNS40NC0xOC4wNS0zMy43NC0zMS42Ny04LjMxLTEzLjYxLTEyLjQ2LTI5LjMtMTIuNDYtNDcuMDdzNC4xNS0zMy40NSwxMi40Ni00Ny4wN2M4LjMxLTEzLjYxLDE5LjU2LTI0LjE3LDMzLjc0LTMxLjY3LDE0LjE5LTcuNDksMjkuODItMTEuMjUsNDYuOS0xMS4yNSwyNywwLDQ3LjUzLDguODksNjEuNjEsMjYuNjV2LTIzLjg4aDUxLjIyWm0tNjYuOTcsMTIwLjI3YzkuMTEtOC40MiwxMy42Ny0xOS40NCwxMy42Ny0zMy4wNXMtNC41Ni0yNC42My0xMy42Ny0zMy4wNWMtOS4xMi04LjQyLTIwLjgzLTEyLjYzLTM1LjEzLTEyLjYzcy0yNi4wOCw0LjIxLTM1LjMsMTIuNjNjLTkuMjMsOC40My0xMy44NCwxOS40NC0xMy44NCwzMy4wNXM0LjYxLDI0LjYzLDEzLjg0LDMzLjA1YzkuMjIsOC40MywyMC45OSwxMi42MywzNS4zLDEyLjYzczI2LjAxLTQuMjEsMzUuMTMtMTIuNjNaIi8+PHBhdGggZD0ibTEwOTEuNTYsNTEuNjdjLTYuMjMtNS43Ny05LjM1LTEyLjkyLTkuMzUtMjEuNDZzMy4xMi0xNS42OSw5LjM1LTIxLjQ2YzYuMjMtNS43NiwxNC4zLTguNjUsMjQuMjMtOC42NXMxOCwyLjc3LDI0LjIzLDguMzFjNi4yMyw1LjU0LDkuMzUsMTIuNDYsOS4zNSwyMC43NywwLDktMy4xMiwxNi40NC05LjM1LDIyLjMyLTYuMjMsNS44OC0xNC4zMSw4LjgzLTI0LjIzLDguODNzLTE4LTIuODgtMjQuMjMtOC42NVptLTIuNzcsMzQuNjFoNTMuOTl2MTg2LjJoLTUzLjk5Vjg2LjI4WiIvPjxwYXRoIGQ9Im0xMzIxLjcxLDI2My40OGMtNS4zMSwzLjkzLTExLjgzLDYuODctMTkuNTYsOC44My03LjczLDEuOTYtMTUuODcsMi45NC0yNC40LDIuOTQtMjIuMTUsMC0zOS4yOC01LjY1LTUxLjQtMTYuOTYtMTIuMTEtMTEuMy0xOC4xNy0yNy45MS0xOC4xNy00OS44NHYtNzYuNDloLTI4Ljczdi00MS41M2gyOC43M3YtNDUuMzRoNTMuOTl2NDUuMzRoNDYuMzh2NDEuNTNoLTQ2LjM4djc1LjhjMCw3Ljg1LDIuMDIsMTMuOSw2LjA2LDE4LjE3LDQuMDQsNC4yNyw5Ljc0LDYuNCwxNy4xMyw2LjQsOC41MywwLDE1LjgtMi4zLDIxLjgtNi45MmwxNC41NCwzOC4wN1oiLz48cGF0aCBkPSJtMTUxMC4zNCwxMDAuNjRjMTMuODQsNy43MywyNC42OSwxOC42NCwzMi41MywzMi43MSw3Ljg0LDE0LjA4LDExLjc3LDMwLjExLDExLjc3LDQ4LjExcy0zLjkzLDM0LjM4LTExLjc3LDQ4LjQ1Yy03Ljg1LDE0LjA4LTE4LjY0LDI0Ljk4LTMyLjM2LDMyLjcxLTEzLjczLDcuNzMtMjkuMjUsMTEuNi00Ni41NSwxMS42LTE0Ljc3LDAtMjguMDktMy4wNi0zOS45Ny05LjE3LTExLjg5LTYuMTEtMjEuNjMtMTUuMDYtMjkuMjUtMjYuODJ2MTAxLjQxaC0yNC41N1Y5MC40M2gyMy41M3YzNS45OWM3LjM4LTExLjk5LDE3LjEzLTIxLjIzLDI5LjI1LTI3LjY5LDEyLjExLTYuNDYsMjUuNzktOS42OSw0MS4wMS05LjY5LDE3LjA3LDAsMzIuNTMsMy44Nyw0Ni4zOCwxMS42Wm0tMTMuNSwxNDIuOTRjMTAuMzgtNS44OCwxOC41Mi0xNC4yNCwyNC40LTI1LjA5LDUuODgtMTAuODQsOC44My0yMy4xOSw4LjgzLTM3LjAzcy0yLjk0LTI2LjEzLTguODMtMzYuODZjLTUuODgtMTAuNzMtMTQuMDItMTkuMDktMjQuNC0yNS4wOS0xMC4zOC02LTIxLjkyLTktMzQuNjEtOXMtMjQuNTIsMy0zNC43OCw5Yy0xMC4yNyw2LTE4LjM0LDE0LjM2LTI0LjIzLDI1LjA5LTUuODgsMTAuNzMtOC44MywyMy4wMi04LjgzLDM2Ljg2czIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjIzLTIuOTQsMzQuNjEtOC44M1oiLz48cGF0aCBkPSJtMTU5Ny4yMSwyNjIuMjdjLTE0LjA4LTcuOTYtMjUuMTUtMTguOTgtMzMuMjMtMzMuMDUtOC4wOC0xNC4wNy0xMi4xMS0yOS45OS0xMi4xMS00Ny43NnM0LjAzLTMzLjY5LDEyLjExLTQ3Ljc2YzguMDctMTQuMDcsMTkuMTUtMjUuMDMsMzMuMjMtMzIuODgsMTQuMDctNy44NCwyOS44OC0xMS43Nyw0Ny40Mi0xMS43N3MzMy4zNCwzLjkzLDQ3LjQyLDExLjc3YzE0LjA3LDcuODUsMjUuMDksMTguODEsMzMuMDUsMzIuODgsNy45NiwxNC4wOCwxMS45NCwzMCwxMS45NCw0Ny43NnMtMy45OCwzMy42OS0xMS45NCw0Ny43NmMtNy45NiwxNC4wOC0xOC45OCwyNS4wOS0zMy4wNSwzMy4wNS0xNC4wOCw3Ljk2LTI5Ljg4LDExLjk0LTQ3LjQyLDExLjk0cy0zMy4zNS0zLjk4LTQ3LjQyLTExLjk0Wm04Mi4yLTE4LjY5YzEwLjI2LTUuODgsMTguMjgtMTQuMjQsMjQuMDUtMjUuMDksNS43Ny0xMC44NCw4LjY1LTIzLjE5LDguNjUtMzcuMDNzLTIuODktMjYuMTktOC42NS0zNy4wM2MtNS43Ny0xMC44NC0xMy43OS0xOS4yMS0yNC4wNS0yNS4wOS0xMC4yNy01Ljg4LTIxLjg2LTguODMtMzQuNzgtOC44M3MtMjQuNTIsMi45NC0zNC43OCw4LjgzYy0xMC4yNyw1Ljg4LTE4LjM0LDE0LjI1LTI0LjIzLDI1LjA5LTUuODgsMTAuODUtOC44MywyMy4xOS04LjgzLDM3LjAzczIuOTQsMjYuMTksOC44MywzNy4wM2M1Ljg4LDEwLjg1LDEzLjk2LDE5LjIxLDI0LjIzLDI1LjA5LDEwLjI2LDUuODgsMjEuODYsOC44MywzNC43OCw4LjgzczI0LjUxLTIuOTQsMzQuNzgtOC44M1oiLz48cGF0aCBkPSJtMTc1Mi4yNiw0NS40NGMtMy40Ni0zLjQ2LTUuMTktNy42MS01LjE5LTEyLjQ2czEuNzMtOC42NSw1LjE5LTEyLjExYzMuNDYtMy40Niw3LjczLTUuMTksMTIuOC01LjE5czkuMzUsMS42OCwxMi44MSw1LjAyYzMuNDYsMy4zNSw1LjE5LDcuMzMsNS4xOSwxMS45NCwwLDUuMDgtMS43Myw5LjM0LTUuMTksMTIuODEtMy40NiwzLjQ2LTcuNzMsNS4xOS0xMi44MSw1LjE5cy05LjM0LTEuNzMtMTIuOC01LjE5Wm0uMzUsNDQuOTloMjQuNTd2MTgyLjA1aC0yNC41N1Y5MC40M1oiLz48cGF0aCBkPSJtMTk1OC4zNiwxMDguOTVjMTMuNSwxMy4yNywyMC4yNSwzMi41OSwyMC4yNSw1Ny45N3YxMDUuNTZoLTI0LjU3di0xMDMuMTRjMC0xOC45Mi00LjczLTMzLjM0LTE0LjE5LTQzLjI2LTkuNDYtOS45Mi0yMi45Ni0xNC44OC00MC40OS0xNC44OC0xOS42MSwwLTM1LjEzLDUuODMtNDYuNTUsMTcuNDgtMTEuNDIsMTEuNjUtMTcuMTMsMjcuNzUtMTcuMTMsNDguMjh2OTUuNTJoLTI0LjU3VjkwLjQzaDIzLjUzdjMzLjU3YzYuNjktMTEuMDgsMTUuOTctMTkuNjcsMjcuODYtMjUuNzksMTEuODgtNi4xMSwyNS42Ny05LjE3LDQxLjM2LTkuMTcsMjIuODQsMCw0MS4wMSw2LjY0LDU0LjUxLDE5LjlaIi8+PHBhdGggZD0ibTIxMDYuNjYsMjYxLjQxYy00LjYyLDQuMTUtMTAuMzMsNy4zMy0xNy4xMyw5LjUyLTYuODEsMi4xOS0xMy45LDMuMjktMjEuMjgsMy4yOS0xNy4wOCwwLTMwLjIzLTQuNjEtMzkuNDYtMTMuODQtOS4yMy05LjIzLTEzLjg0LTIyLjI2LTEzLjg0LTM5LjExdi0xMTAuMDZoLTMyLjUzdi0yMC43N2gzMi41M3YtMzkuOGgyNC41N3YzOS44aDU1LjM4djIwLjc3aC01NS4zOHYxMDguNjhjMCwxMC44NSwyLjcxLDE5LjA5LDguMTMsMjQuNzUsNS40Miw1LjY2LDEzLjIxLDguNDgsMjMuMzYsOC40OCw1LjA3LDAsOS45OC0uODEsMTQuNzEtMi40Miw0LjczLTEuNjEsOC44My0zLjkyLDEyLjI5LTYuOTJsOC42NSwxNy42NVoiLz48cGF0aCBpZD0iY3phcm55IiBkPSJtMjE2Ljc3LDk2LjE0bC0xMTQuMTEsODAuNjljLTEuNywxLjM5LTIyLjI4LDE3LjcyLTUxLjUyLDE1LjA5QzI0LjkxLDE4OS41OSwyLjg2LDE3My4wNCwwLDE1MS42OVY0MS42QzIuNCwxOS43LDI0LjYsMi42OCw1MS4xNC4yOWMyOS4xNy0yLjYzLDQ5Ljc0LDEzLjY5LDUxLjUyLDE1LjA5bDExNC4xMSw4MC43N1oiIGZpbGw9IiMwZjFmM2YiLz48cGF0aCBpZD0iY3phcm55LTIiIGQ9Im0xMjUuOTcsMjIyLjY4bDExNC4xMS04MC42OWMxLjctMS4zOSwyMi4yOC0xNy43Miw1MS41Mi0xNS4wOSwyNi4yMywyLjMyLDQ4LjI3LDE4Ljg4LDUxLjE0LDQwLjIzdjExMC4wOWMtMi40LDIxLjg5LTI0LjYsMzguOTEtNTEuMTQsNDEuMzEtMjkuMTcsMi42My00OS43NC0xMy42OS01MS41Mi0xNS4wOWwtMTE0LjExLTgwLjc3WiIgZmlsbD0iI2ZjNmY0YiIvPjxjaXJjbGUgY3g9IjU0LjY2IiBjeT0iMjg4LjA5IiByPSI1NC42NiIgZmlsbD0iIzAzZDE5MCIvPjwvc3ZnPg==" alt="DigitPoint" class="powered-by-logo">    
+    </a>
+</div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 <div class="testimonials-subsection" id="subsection-youtube">
     <h3 class="testimonials-subsection-title" onclick="toggleTestimonialSubsection('subsection-youtube')">
