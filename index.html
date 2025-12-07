@@ -1254,23 +1254,52 @@
     padding: 1.5rem 0 2.5rem 0;
 }
 
+/* Stylizacja wstępu - Wersja lekka z cytatem z lewej */
 .articles-intro {
-    margin: 0 0 2.25rem 0;              /* więcej oddechu nad listą tematów */
-    max-width: 540px;                   /* trochę węższa kolumna – wygląda bardziej jak lead */
-    font-size: 0.9rem;
+    /* Układ */
+    max-width: 800px;
+    margin: 0 auto 3rem;     /* Centrowanie bloku */
+    padding-left: 60px;      /* ZROBIENIE MIEJSCA na znaczek z lewej strony */
+    padding-top: 10px;       /* Lekka korekta góry */
+    
+    /* Typografia */
+    text-align: justify;
+    font-size: 0.95rem;
+    font-style: italic;
     line-height: 1.8;
-    color: rgba(26, 26, 26, 0.7);       /* trochę jaśniejsze, żeby nie „konkurowało” z nagłówkiem */
+    color: #666;
+    
+    /* Niezbędne do pozycjonowania znaczka */
+    position: relative;
 }
 
-/* Pasek z tematami artykułów */
+/* Ozdobny "znaczek" z lewej strony */
+.articles-intro::before {
+    content: '❝';
+    font-family: serif;      /* Szeryfowa czcionka dla elegancji */
+    font-size: 90px;         /* Duży rozmiar */
+    line-height: 1;
+    
+    /* Pozycjonowanie w lewym górnym rogu */
+    position: absolute;
+    top: -20px;              /* Unosi się lekko nad tekstem */
+    left: 0;                 /* Przyklejony do lewej krawędzi kontenera */
+    
+    /* Wygląd */
+    color: rgba(0, 0, 0, 0.06); /* Jeszcze jaśniejszy, żeby nie odwracał uwagi */
+}
+
+/* Pasek z tematami artykułów - POPRAWIONY */
 .articles-topics {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem 1.5rem;
+    justify-content: center; /* To wyśrodkuje przyciski */
+    gap: 15px;               /* Równe odstępy między nimi */
+    width: 100%;             /* Pewność, że pasek ma pełną szerokość */
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    margin-bottom: 1.75rem;
-    border-top: 1px solid rgba(26, 26, 26, 0.08); /* subtelna linia oddzielająca opis od „nawigacji” */
+    margin-bottom: 2.5rem;   /* Nieco większy odstęp od dołu dla estetyki */
+    border-top: 1px solid rgba(26, 26, 26, 0.08);
 }
 
 .articles-topic {
@@ -3010,8 +3039,9 @@
 <div class="testimonials-subsection-content">
     <div class="section-content articles-module">
         <p class="articles-intro">
-            Poniżej znajdziesz moje eksperckie treści z bloga pogrupowane tematycznie – od fundamentów Pipedrive,
-            przez porządek w danych i automatyzacje, po raportowanie oraz pracę zespołową.
+            Poniżej znajdziesz zestawienie artykułów tworzących moją rosnącą bazę wiedzy o CRM-ach - zebranych i uporządkowanych tak, aby łatwo było odnaleźć to, czego aktualnie poszukujesz.
+Każdy z tych artykułów powstał jako odpowiedź na realne wyzwania, z jakimi najczęściej spotykają się firmy wdrażające lub rozwijające CRM.
+Poniżej znajdziesz te treści pogrupowane tematycznie, tak abyś mógł szybko skoczyć do obszaru, który aktualnie rozwijasz.
         </p>
 
         <!-- Pasek z tematami -->
