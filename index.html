@@ -508,6 +508,25 @@
             fill: var(--text-primary);
         }
 
+        /* Stats Button - przycisk O mnie w liczbach */
+        button.social-link.stats-btn {
+            background: none;
+            border: none;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        button.social-link.stats-btn:hover {
+            border-bottom-color: var(--text-primary);
+        }
+
+        button.social-link.stats-btn svg {
+            fill: none;
+            stroke: var(--text-primary);
+        }
+
         .section {
             margin-bottom: 5rem;
             padding-top: 2rem;
@@ -2415,6 +2434,15 @@
                         </svg>
                         LinkedIn
                     </a>
+                    <button onclick="openLiveDashboard()" class="social-link stats-btn" aria-label="Live Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"/>
+                            <path d="M18 17V9"/>
+                            <path d="M13 17V5"/>
+                            <path d="M8 17v-3"/>
+                        </svg>
+                        O mnie w liczbach
+                    </button>
                 </div>
             </div>
         </div>
@@ -3989,6 +4017,482 @@ document.addEventListener('DOMContentLoaded', () => {
     // Odświeżaj co minutę (gdyby ktoś miał otwartą stronę przy zmianie godziny)
     setInterval(updateLiveStatus, 60000);
 });
+</script>
+
+<!-- ========================================
+     LIVE DASHBOARD MODAL
+     ======================================== -->
+<div id="live-dashboard-modal" class="live-dashboard-modal">
+    <div class="live-dashboard-content">
+        <span class="live-dashboard-close" onclick="closeLiveDashboard()">&times;</span>
+        
+        <!-- Header z LIVE badge -->
+        <div class="live-dashboard-header">
+            <h2 class="live-dashboard-title">Dashboard</h2>
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                LIVE
+            </div>
+        </div>
+        
+        <p class="live-dashboard-subtitle">Statystyki mojej pracy w czasie rzeczywistym</p>
+        
+        <!-- Stats Grid -->
+        <div class="live-stats-grid">
+            <div class="live-stat-card">
+                <div class="live-stat-value" id="stat-projects">14</div>
+                <div class="live-stat-label">Zrealizowane projekty</div>
+            </div>
+            <div class="live-stat-card">
+                <div class="live-stat-value" id="stat-demos">49</div>
+                <div class="live-stat-label">Przeprowadzone demo CRM</div>
+            </div>
+            <div class="live-stat-card">
+                <div class="live-stat-value" id="stat-clients">47</div>
+                <div class="live-stat-label">Przeszkoleni klienci</div>
+            </div>
+            <div class="live-stat-card">
+                <div class="live-stat-value" id="stat-automations">79</div>
+                <div class="live-stat-label">Zautomatyzowanych procesów</div>
+            </div>
+        </div>
+        
+        <!-- Rating Section -->
+        <a href="https://www.pipedrive.com/en/marketplace/partners/digitpoint" target="_blank" rel="noopener noreferrer" class="live-rating-section">
+            <div class="live-rating-stars">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <span class="live-rating-text">Średnia ocena klientów 5/5</span>
+            <span class="live-rating-arrow">→</span>
+        </a>
+        
+        <!-- Refresh Button -->
+        <div class="live-dashboard-footer">
+            <button onclick="refreshDashboardStats()" class="refresh-btn" id="refresh-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 4v6h-6"/>
+                    <path d="M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                <span id="refresh-text">Refresh Now</span>
+            </button>
+            <span class="last-update" id="last-update">Ostatnia aktualizacja: teraz</span>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ========================================
+   LIVE DASHBOARD STYLES
+   ======================================== */
+
+.live-dashboard-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 26, 26, 0.8);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.live-dashboard-modal.active {
+    display: flex;
+}
+
+.live-dashboard-content {
+    background: var(--bg-primary);
+    max-width: 520px;
+    width: 90%;
+    padding: 2.5rem;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.live-dashboard-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    line-height: 1;
+    font-weight: 300;
+}
+
+.live-dashboard-close:hover {
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+/* Header with LIVE badge */
+.live-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.live-dashboard-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.live-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        opacity: 0.7;
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+    }
+}
+
+.live-dashboard-subtitle {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* Stats Grid */
+.live-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.live-stat-card {
+    background: #fff;
+    border: 1px solid rgba(26, 26, 26, 0.08);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.live-stat-card:hover {
+    border-color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
+}
+
+.live-stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.live-stat-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+/* Rating Section - pod gridem */
+.live-rating-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    background: #fff;
+    border: 1px solid rgba(26, 26, 26, 0.08);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.live-rating-section:hover {
+    border-color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
+}
+
+.live-rating-stars {
+    display: flex;
+    gap: 0.15rem;
+}
+
+.live-rating-stars svg {
+    width: 20px;
+    height: 20px;
+    fill: #f59e0b;
+    transition: transform 0.2s ease;
+}
+
+.live-rating-section:hover .live-rating-stars svg {
+    transform: scale(1.1);
+}
+
+.live-rating-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+}
+
+.live-rating-arrow {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.2s ease;
+}
+
+.live-rating-section:hover .live-rating-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Footer with Refresh */
+.live-dashboard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+    background: var(--text-secondary);
+    transform: translateY(-1px);
+}
+
+.refresh-btn:active {
+    transform: translateY(0);
+}
+
+.refresh-btn svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.5s ease;
+}
+
+.refresh-btn.refreshing svg {
+    animation: spinRefresh 0.8s linear infinite;
+}
+
+@keyframes spinRefresh {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.last-update {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .live-stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .live-stat-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .live-rating-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .live-rating-section:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .live-badge {
+    background: #fff;
+    color: #1a1a1a;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .live-dashboard-content {
+        padding: 2rem 1.5rem;
+    }
+    
+    .live-dashboard-title {
+        font-size: 2rem;
+    }
+    
+    .live-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .live-stat-value {
+        font-size: 2.5rem;
+    }
+    
+    .live-dashboard-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+// --- LIVE DASHBOARD LOGIC ---
+function openLiveDashboard() {
+    const modal = document.getElementById('live-dashboard-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        animateStats();
+    }
+}
+
+function closeLiveDashboard() {
+    const modal = document.getElementById('live-dashboard-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Zamykanie po kliknięciu w tło
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('live-dashboard-modal');
+    if (e.target === modal) {
+        closeLiveDashboard();
+    }
+});
+
+// Zamykanie klawiszem Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeLiveDashboard();
+    }
+});
+
+// Animacja liczników
+function animateStats() {
+    const stats = {
+        'stat-projects': 14,
+        'stat-demos': 35,
+        'stat-clients': 47,
+        'stat-automations': 79
+    };
+    
+    Object.entries(stats).forEach(([id, target]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        
+        let current = 0;
+        const duration = 1000;
+        const increment = target / (duration / 16);
+        
+        el.textContent = '0';
+        
+        const counter = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                el.textContent = target;
+                clearInterval(counter);
+            } else {
+                el.textContent = Math.floor(current);
+            }
+        }, 16);
+    });
+}
+
+// Funkcja Refresh
+function refreshDashboardStats() {
+    const btn = document.getElementById('refresh-btn');
+    const text = document.getElementById('refresh-text');
+    const update = document.getElementById('last-update');
+    
+    if (!btn) return;
+    
+    btn.classList.add('refreshing');
+    btn.disabled = true;
+    text.textContent = 'Odświeżanie...';
+    
+    setTimeout(() => {
+        animateStats();
+        
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('pl-PL', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        update.textContent = `Ostatnia aktualizacja: ${timeStr}`;
+        
+        btn.classList.remove('refreshing');
+        btn.disabled = false;
+        text.textContent = 'Refresh Now';
+    }, 800);
+}
 </script>
 
 </body>
