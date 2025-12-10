@@ -1813,6 +1813,7 @@
 .yt-videos-container {
     display: none; /* Ukryte na start */
     flex-wrap: wrap;
+    justify-content: center; /* Wyśrodkowanie filmów */
     gap: 3rem; /* Większy odstęp między kaflami */
     /* Kluczowe: duży padding na dole, żeby cień się mieścił, i overflow visible */
     padding: 1rem 1rem 5rem 1rem; 
@@ -2338,6 +2339,94 @@
     </script>
 </head>
 <body>
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-container">
+        <div class="reading-progress-bar" id="readingProgress"></div>
+    </div>
+
+    <style>
+    /* Reading Progress Bar */
+    .reading-progress-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: transparent;
+        z-index: 9999;
+    }
+    
+    .reading-progress-bar {
+        height: 100%;
+        width: 0%;
+        background: var(--text-primary);
+        transition: width 0.1s ease-out;
+    }
+    
+    /* Dark mode */
+    [data-theme="dark"] .reading-progress-bar {
+        background: var(--text-primary);
+    }
+    
+    /* Ukryj na samej górze strony */
+    .reading-progress-bar.hidden {
+        opacity: 0;
+    }
+    
+    /* Subtelny gradient dla efektu głębi */
+    .reading-progress-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(to right, transparent, rgba(26, 26, 26, 0.1));
+        pointer-events: none;
+    }
+    
+    [data-theme="dark"] .reading-progress-container::after {
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1));
+    }
+    </style>
+
+    <script>
+    // Reading Progress Bar Logic
+    (function() {
+        const progressBar = document.getElementById('readingProgress');
+        if (!progressBar) return;
+        
+        let ticking = false;
+        
+        function updateProgress() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            
+            progressBar.style.width = Math.min(progress, 100) + '%';
+            
+            // Ukryj gdy na samej górze
+            if (scrollTop < 50) {
+                progressBar.classList.add('hidden');
+            } else {
+                progressBar.classList.remove('hidden');
+            }
+            
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateProgress);
+                ticking = true;
+            }
+        }, { passive: true });
+        
+        // Initial call
+        updateProgress();
+    })();
+    </script>
+
     <!-- Logo w lewym górnym rogu -->
     <div class="site-logo" aria-label="Logo">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
